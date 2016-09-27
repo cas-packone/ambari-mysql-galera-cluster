@@ -43,9 +43,11 @@ class MysqldbMaster(Script):
         #install mysql DB
         self.installDB(env)
 
-        #db_password = params.db_password
-        #cmd = format("/usr/bin/mysqladmin -u root password '{db_password}'")
-        #Execute(cmd, ignore_failures=True)
+        db_password = params.db_password
+        default_pwd = params.default_pwd
+        "mysqladmin -u root -padmin password 'admin'"
+        cmd = format("/usr/bin/mysqladmin -u root -p{default_pwd} password '{db_password}'")
+        Execute(cmd, ignore_failures=True)
 
         # init db 修改权限和口令
         self.initdb(env)
@@ -67,12 +69,11 @@ class MysqldbMaster(Script):
     def configure(self, env):
         print 'configure mysqldb'
         import params
+        self.installDB(env)
 
         env.set_params(params)
         server_cnf_content = InlineTemplate(params.server_cnf_content)
         File(format("/etc/mysql/conf.d/my_galera.cnf"), content=server_cnf_content, owner='root')
-
-        self.installDB(env)
 
         db_password = params.db_password
         file_object = open(self.db_pass_file)

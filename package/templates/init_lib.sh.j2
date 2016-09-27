@@ -1,4 +1,4 @@
-mysql -u root --password {{default_pwd}} << EOF
+mysql -u root --password={{db_password}} << EOF
 SET wsrep_on=OFF;
 use mysql;
 update user set password=password("{{db_password}}") where user="root";
