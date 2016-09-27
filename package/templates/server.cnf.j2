@@ -1,0 +1,66 @@
+#
+# These groups are read by MariaDB server.
+# Use it for options that only the server (but not clients) should see
+#
+# See the examples of server my.cnf files in /usr/share/mysql/
+#
+
+# this is read by the standalone daemon and embedded servers
+[server]
+
+# this is only for the mysqld standalone daemon
+[mysqld]
+
+# This group is only read by MariaDB servers, not by MySQL.
+# If you use the same .cnf file for MySQL and MariaDB,
+# you can put MariaDB-only options here
+
+[mysql]
+#设置mysql client default character
+default-character-set=utf8
+
+[mysqld]
+bind-address=0.0.0.0
+character-set-server=utf8
+default-storage-engine=INNODB
+#配置时区
+default-time-zone = '+8:00'
+datadir={{db_dir}}
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+#Skip reverse DNS lookup of clients
+skip-name-resolve
+
+max_connections=5000
+key_buffer_size = 384M
+table_open_cache = 512
+sort_buffer_size = 2M
+read_buffer_size = 2M
+read_rnd_buffer_size = 8M
+thread_cache_size = 8
+query_cache_size = 32M
+# Try number of CPU's*2 for thread_concurrency
+thread_concurrency = 8
+
+innodb_buffer_pool_size = 384M
+innodb_additional_mem_pool_size = 20M
+
+#galera innodb参数
+binlog_format=ROW
+innodb_autoinc_lock_mode=2
+innodb_flush_log_at_trx_commit=0
+
+#galera cluster参数
+wsrep_provider=/usr/lib64/galera-3/libgalera_smm.so
+wsrep_provider_options="gcache.size=300M; gcache.page_size=1G"
+wsrep_sst_method=rsync
+wsrep_sst_auth=wsrep_sst-user:{{db_password}}
+
+wsrep_cluster_name=MyCluster
+wsrep_cluster_address="gcomm://{{mysqldb_hosts_str}}"
+wsrep_node_name="{{mysqldb_current_host}}"
+wsrep_node_address="{{mysqldb_current_host}}"
+
+[mysql_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid

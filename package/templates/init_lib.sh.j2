@@ -1,0 +1,11 @@
+mysql -u root --password {{default_pwd}} << EOF
+SET wsrep_on=OFF;
+use mysql;
+update user set password=password("{{db_password}}") where user="root";
+GRANT ALL PRIVILEGES ON *.* TO root@localhost  IDENTIFIED BY '{{db_password}}' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO root@"%"  IDENTIFIED BY '{{db_password}}' WITH GRANT OPTION;
+DELETE FROM mysql.user WHERE user='';
+GRANT ALL ON *.* TO 'wsrep_sst-user'@'%' IDENTIFIED BY '{{db_password}}';
+FLUSH PRIVILEGES;
+quit
+EOF

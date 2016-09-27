@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<metainfo>
+  <schemaVersion>2.0</schemaVersion>
+  <services>
+    <service>
+      <name>MYSQLDB</name>
+      <displayName>MySqlDB</displayName>
+      <comment>MysqlDB is a relational database management system (RDBMS) and MySqlDB Galera Cluster is a synchronous multi-master cluster for MysqlDB. It is available on Linux only, and only supports the InnoDB storage engines.</comment>
+      <version>5.6</version>
+      <components>
+        <component>
+          <name>Mysqldb_node</name>
+          <displayName>Mysqldb Node</displayName>
+          <category>MASTER</category>
+		  <cardinality>2+</cardinality>
+          <commandScript>
+            <script>scripts/mysqldb.py</script>
+            <scriptType>PYTHON</scriptType>
+            <timeout>600</timeout>
+          </commandScript>
+        </component>
+
+      </components>
+
+      <osSpecifics>
+        <osSpecific>
+          <osFamily>redhat5,redhat6,redhat7</osFamily>
+          <packages>
+            <package>
+              <name>socat</name>
+            </package>
+          </packages>
+        </osSpecific>
+      </osSpecifics>
+    </service>
+  </services>
+</metainfo>

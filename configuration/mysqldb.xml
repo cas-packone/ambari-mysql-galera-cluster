@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration supports_adding_forbidden="true">
+
+
+  <property>
+    <name>db_path</name>
+    <value>/var/lib/mysql</value>
+    <description>Path where the mysql is stored.</description>
+    <value-attributes>
+      <type>directory</type>
+    </value-attributes>
+  </property>
+
+  <property require-input="true">
+    <name>db_password</name>
+    <value></value>
+    <property-type>PASSWORD</property-type>
+    <display-name>Database Password</display-name>
+    <description>password to use</description>
+    <value-attributes>
+      <type>password</type>
+      <overridable>false</overridable>
+    </value-attributes>
+  </property>
+
+  <property>
+    <name>content</name>
+    <description>This is the jinja template for server.cnf file</description>
+    <value>
+# These groups are read by MariaDB server.
+# Use it for options that only the server (but not clients) should see
+# See the examples of server my.cnf files in /usr/share/mysql/
+
+# this is read by the standalone daemon and embedded servers
+[server]
+
+# this is only for the mysqld standalone daemon
+[mysqld]
+
+# This group is only read by MariaDB servers, not by MySQL.
+# If you use the same .cnf file for MySQL and MariaDB,
+# you can put MariaDB-only options here
+
+[mysql]
+#settion mysql client default character
+default-character-set=utf8
+
+[mysqld]
+bind-address=0.0.0.0
+character-set-server=utf8
+default-storage-engine=INNODB
+
+#settion time zone
+default-time-zone = '+8:00'
+datadir={{db_dir}}
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+#Skip reverse DNS lookup of clients
+skip-name-resolve
+
+max_connections=5000
+key_buffer_size = 384M
+table_open_cache = 512
+sort_buffer_size = 2M
+read_buffer_size = 2M
+read_rnd_buffer_size = 8M
+thread_cache_size = 8
+query_cache_size = 32M
+# Try number of CPU's*2 for thread_concurrency
+thread_concurrency = 8
+
+innodb_buffer_pool_size = 384M
+innodb_additional_mem_pool_size = 20M
+
+#galera innodb
+binlog_format=ROW
+innodb_autoinc_lock_mode=2
+innodb_flush_log_at_trx_commit=0
+
+#galera cluster
+wsrep_provider=/usr/lib64/galera-3/libgalera_smm.so
+wsrep_provider_options="gcache.size=300M; gcache.page_size=1G"
+wsrep_sst_method=rsync
+wsrep_sst_auth=wsrep_sst-user:{{db_password}}
+
+wsrep_cluster_name=MyCluster
+wsrep_cluster_address="gcomm://{{mysqldb_hosts_str}}"
+wsrep_node_name="{{mysqldb_current_host}}"
+wsrep_node_address="{{mysqldb_current_host}}"
+
+[mysql_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+    </value>
+  </property>
+
+    <property>
+        <name>mycnf</name>
+        <description>this is mysql cnf.</description>
+        <value>
+[mysqld]
+!includedir /etc/mysql/conf.d/
+        </value>
+
+    </property>
+
+
+</configuration>
