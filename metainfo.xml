@@ -12,7 +12,7 @@
           <name>Mysqldb_node</name>
           <displayName>Mysqldb Node</displayName>
           <category>MASTER</category>
-		  <cardinality>2+</cardinality>
+		  <cardinality>3+</cardinality>
           <commandScript>
             <script>scripts/mysqldb.py</script>
             <scriptType>PYTHON</scriptType>
