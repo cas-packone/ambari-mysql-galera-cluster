@@ -9,7 +9,8 @@
 name = Galera
 gpgcheck=0
 enabled=1
-baseurl = http://releases.galeracluster.com/centos/6/x86_64/
+#baseurl = http://releases.galeracluster.com/centos/6/x86_64/
+baseurl = http://10.0.71.15/HDP/centos6/2.x/updates/2.2.8.0/mysql/
         </value>
     </property>
 

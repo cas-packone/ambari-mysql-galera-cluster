@@ -3,6 +3,7 @@ import os
 import base64
 from time import sleep
 from resource_management import *
+from GrantTables import *
 
 
 class MysqldbMaster(Script):
@@ -15,7 +16,6 @@ class MysqldbMaster(Script):
         Execute('touch /etc/yum.repos.d/galera.repo ', ignore_failures=True)
         galera_repo = InlineTemplate(params.galera_repo)
         File(format('/etc/yum.repos.d/galera.repo'), content=galera_repo, owner='root')
-        Execute('yum clean all ', ignore_failures=True)
 
         # delete mysql-server
         Execute('rpm -e mysql-server', ignore_failures=True)
@@ -23,35 +23,39 @@ class MysqldbMaster(Script):
         #delete yum mysql
         Execute('yum -y remove mysql-libs-*', ignore_failures=True)
         sleep(10)
-
+        Execute('yum clean all ', ignore_failures=True)
         #delete default mysql directory
         Execute('rm -rf /usr/share/mysql', ignore_failures=True)
-        Execute('rm -rf /var/lib/mysql', ignore_failures=True)
+        #Execute('rm -rf /var/lib/mysql', ignore_failures=True)
         Execute('rm -f /etc/mysql/conf.d/my_galera.cnf', ignore_failures=True)
 
         self.install_packages(env)
-        print 'install mysqldb'
-        if self.mysqldb_packages is not None and len(self.mysqldb_packages):
-            for pack in self.mysqldb_packages:
-                Package(pack)
+        #print 'install mysqldb'
+        #if self.mysqldb_packages is not None and len(self.mysqldb_packages):
+        #    for pack in self.mysqldb_packages:
+        #       Package(pack)
+        #       sleep(10)
 
-        sleep(10)
         # configure cluster
-        Execute('service mysql start')
+        Execute('yes | yum install galera-3 mysql-wsrep-5.6')
+
         sleep(5)
+        GrantTables.StartGrantTables()
+        sleep(5)
+
+        #set passeord
+        self.initdbpwd(env)
+        sleep(5)
+        Execute('service mysql stop')
+        sleep(5)
+        Execute('service mysql start')
 
         #install mysql DB
         self.installDB(env)
 
-        db_password = params.db_password
-        default_pwd = params.default_pwd
-        "mysqladmin -u root -padmin password 'admin'"
-        cmd = format("/usr/bin/mysqladmin -u root -p{default_pwd} password '{db_password}'")
-        Execute(cmd, ignore_failures=True)
-
         # init db 修改权限和口令
         self.initdb(env)
-
+        sleep(5)
         Execute('service mysql stop')
         sleep(5)
 
@@ -133,12 +137,12 @@ class MysqldbMaster(Script):
         import params;
         env.set_params(params)
         service_packagedir = params.service_packagedir
-        init_lib_path = service_packagedir + '/scripts/init_lib.sh'
+        init_lib_path = service_packagedir + '/scripts/init_db.sh'
         File(init_lib_path,
              content=Template("init_lib.sh.j2"),
              mode=0777
              )
-        cmd = format("{service_packagedir}/scripts/init_lib.sh")
+        cmd = format("{service_packagedir}/scripts/init_db.sh")
         Execute('echo "Running ' + cmd + '" as root')
         Execute(cmd)
         db_pass_file = self.db_pass_file
@@ -151,6 +155,20 @@ class MysqldbMaster(Script):
              content=db_password,
              mode=0644
              )
+
+    def initdbpwd(self, env):
+        import params;
+        env.set_params(params)
+        service_packagedir = params.service_packagedir
+        init_lib_path = service_packagedir + '/scripts/init_db_pwd.sh'
+        File(init_lib_path,
+             content=Template("init_db_pwd.sh.j2"),
+             mode=0777
+             )
+        cmd = format("{service_packagedir}/scripts/init_db_pwd.sh")
+        Execute('echo "Running ' + cmd + '" as root')
+        Execute(cmd)
+
 
 
 if __name__ == "__main__":

@@ -35,6 +35,6 @@ try:
     file_content = file_object.read()
     array = file_content.split(':')
     size = len(array)
-    default_pwd = array[size-1]
+    default_pwd = array[size-1].replace("\n", "").lstrip()
 finally:
     file_object.close()
