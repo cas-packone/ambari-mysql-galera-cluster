@@ -30,11 +30,12 @@ my_cnf = config['configurations']['mysqldb']['mycnf']
 #mysql root user default password
 ######################################################################
 default_pwd = ""
-file_object = open("/root/.mysql_secret")
-try:
-    file_content = file_object.read()
-    array = file_content.split(':')
-    size = len(array)
-    default_pwd = array[size-1].replace("\n", "").lstrip()
-finally:
-    file_object.close()
+if os.path.exists("/root/.mysql_secret"):
+    file_object = open("/root/.mysql_secret")
+    try:
+        file_content = file_object.read()
+        array = file_content.split(':')
+        size = len(array)
+        default_pwd = array[size-1].replace("\n", "").lstrip()
+    finally:
+        file_object.close()

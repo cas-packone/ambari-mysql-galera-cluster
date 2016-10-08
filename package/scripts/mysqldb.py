@@ -17,6 +17,18 @@ class MysqldbMaster(Script):
         galera_repo = InlineTemplate(params.galera_repo)
         File(format('/etc/yum.repos.d/galera.repo'), content=galera_repo, owner='root')
 
+        if os.path.isdir("/usr/share/mysql"):
+            service_packagedir = params.service_packagedir
+            init_lib_path = service_packagedir + '/scripts/delete.sh'
+            File(init_lib_path,
+                 content=Template("delete.sh.j2"),
+                 mode=0777
+                 )
+            cmd = format("{service_packagedir}/scripts/delete.sh")
+            Execute('echo "Running ' + cmd + '" as root')
+            Execute(cmd)
+
+
         # delete mysql-server
         Execute('rpm -e mysql-server', ignore_failures=True)
 
@@ -41,13 +53,13 @@ class MysqldbMaster(Script):
 
         sleep(5)
         GrantTables.StartGrantTables()
-        sleep(5)
+        sleep(15)
 
         #set passeord
         self.initdbpwd(env)
-        sleep(5)
+        sleep(10)
         Execute('service mysql stop')
-        sleep(5)
+        sleep(10)
         Execute('service mysql start')
 
         #install mysql DB
@@ -57,7 +69,7 @@ class MysqldbMaster(Script):
         self.initdb(env)
         sleep(5)
         Execute('service mysql stop')
-        sleep(5)
+        sleep(10)
 
         #创建mysql的配置文件
         Execute('mkdir -p /etc/mysql/conf.d')
